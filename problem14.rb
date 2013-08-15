@@ -20,37 +20,36 @@ NOTE: Once the chain starts the terms are allowed to go above one million.
 
 """
 
-
 def collatz(n)
-  if n.even?
-    n/2
-  else
-    3*n+1
-  end
+  n.even? ? n/2 : 3*n+1
 end
 
-def collatz_sequence(n)
-  seq = [n]
-  while true
-    c = collatz(seq.last)
-    seq << c
-    break if c <= 1
-  end
-  seq
+def calculate_length_of_collatz_sequence(n)
+  return 1 if n <= 1
+  return 1 + length_of_collatz_sequence(collatz(n))
+end
+
+$length_cache = {}
+
+def length_of_collatz_sequence(n)
+  $length_cache[n] ||= calculate_length_of_collatz_sequence(n)
 end
 
 def longest_sequence(upper_bound)
-  best = []
+  best_n, best_len = 0, 0
   (1..upper_bound).each do |n|
-    seq = collatz_sequence(n)
-    best = seq if seq.size > best.size
+    len = length_of_collatz_sequence(n)
+    if len > best_len
+      best_n = n
+      best_len = len
+    end
   end
-  best
+  [best_n, best_len]
 end
 
-raise "Wrong!" unless collatz_sequence(13) == [13, 40, 20, 10, 5, 16, 8, 4, 2, 1]
+raise "Wrong!" unless length_of_collatz_sequence(13) == 10
 
-longest = longest_sequence(1_000_000)
+n, len = longest_sequence(1_000_000)
 
-puts "length = #{longest.size}"
-puts "seq = #{longest.inspect}"
+puts "n = #{n}"
+puts "len = #{len}"
