@@ -12,7 +12,7 @@ contains 23 letters and 115 (one hundred and fifteen) contains 20 letters. The u
 of "and" when writing out numbers is in compliance with British usage.
 """
 
-$known = {
+KNOWN_WORDS = {
   0   => "zero",
   1   => "one",
   2   => "two",
@@ -43,34 +43,74 @@ $known = {
   90  => "ninety",
 }
 
-def in_words(n)
-  if $known[n]
-    $known[n]
-  else
-    if n < 100
-      a, b = n / 10, n % 10
-      in_words(a*10) + "-" + in_words(b)
-    elsif n < 1000
-      a, b = n / 100, n % 100
-      in_words(a) + " hundred" + (b > 0 ? " and " + in_words(b) : "")
-    elsif n < 10000
-      a, b = n / 1000, n % 1000
-      in_words(a) + " thousand" + (b > 0 ? " and " + in_words(b) : "")
+class InefficientSolver
+
+  def in_words(n)
+    if KNOWN_WORDS[n]
+      KNOWN_WORDS[n]
     else
-      raise ArgumentError
+      if n < 100
+        a, b = n / 10, n % 10
+        in_words(a*10) + "-" + in_words(b)
+      elsif n < 1000
+        a, b = n / 100, n % 100
+        in_words(a) + " hundred" + (b > 0 ? " and " + in_words(b) : "")
+      elsif n < 10000
+        a, b = n / 1000, n % 1000
+        in_words(a) + " thousand" + (b > 0 ? " and " + in_words(b) : "")
+      else
+        raise ArgumentError
+      end
     end
   end
+
+  def count_letters(number_in_words)
+    number_in_words.gsub(/[ -]/, "").length
+  end
+
+  def length_in_words(n)
+    count_letters(in_words(n))
+  end
+
 end
 
-def count_letters(number_in_words)
-  number_in_words.gsub(/[ -]/, "").length
+class EfficientSolver
+
+  KNOWN_LENGTHS = KNOWN_WORDS.each_with_object({}) { |(n, w), h| h[n] = w.length }
+  SPECIAL_LENGTHS = {
+    100  => "hundred".length,
+    1000 => "thousand".length,
+    :and => 3
+  }
+
+  def length_in_words(n)
+    if KNOWN_LENGTHS[n]
+      KNOWN_LENGTHS[n]
+    else
+      if n < 100
+        a, b = n / 10, n % 10
+        length_in_words(a*10) + length_in_words(b)
+      elsif n < 1000
+        a, b = n / 100, n % 100
+        length_in_words(a) + SPECIAL_LENGTHS[100] + (b > 0 ? SPECIAL_LENGTHS[:and] + length_in_words(b) : 0)
+      elsif n < 10000
+        a, b = n / 1000, n % 1000
+        length_in_words(a) + SPECIAL_LENGTHS[1000] + (b > 0 ? SPECIAL_LENGTHS[:and] + length_in_words(b) : 0)
+      else
+        raise ArgumentError
+      end
+    end
+  end
+
 end
 
-def solve
-  (1..1000).map { |n| count_letters(in_words(n)) }.reduce(:+)
+[InefficientSolver.new, EfficientSolver.new].each do |solver|
+
+  puts solver.class.name
+
+  raise "Wrong!" unless solver.length_in_words(342) == 23
+  raise "Wrong!" unless solver.length_in_words(115) == 20
+
+  puts (1..1000).map { |n| solver.length_in_words(n) }.reduce(:+)
+
 end
-
-raise "Wrong!" unless count_letters(in_words(342)) == 23
-raise "Wrong!" unless count_letters(in_words(115)) == 20
-
-puts solve
