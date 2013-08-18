@@ -55,8 +55,6 @@ triangle3 = [
 [99, 1, 2],
 ]
 
-puts triangle1.inspect
-
 def find_maximum_path(triangle, current_row = 0, current_pos = 0)
   row_below = current_row+1
   if row_below < triangle.size
@@ -68,12 +66,6 @@ def find_maximum_path(triangle, current_row = 0, current_pos = 0)
     triangle[current_row][current_pos]
   end
 end
-
-triangle3 = [
-[1],
-[0, 1],
-[99, 1, 2],
-]
 
 puts find_maximum_path(triangle1)
 puts find_maximum_path(triangle2)
